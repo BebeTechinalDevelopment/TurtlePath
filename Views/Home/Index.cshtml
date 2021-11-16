@@ -1,0 +1,87 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+
+<div class="text-center">
+    <h2>Upload A Text File For The Turtle To Follow</h2>
+    <div class="col-12">
+        <input type="file" name="path" id="path" /><br />
+    </div>
+
+    <div class="col-12">
+        <button type="button" onclick="GetPath()">Get Path</button>
+    </div>
+
+</div>
+<br />
+<br />
+<div class="text-center" id="info">
+    <h2>Turtle Information</h2>
+    <div class="col-12">
+        <label>Final Location: </label>
+        <span id="finalLocation">
+        </span>
+    </div>
+
+    <div class="col-12">
+        <label>Turtle Path: </label>
+        <ul id="turtlePath">
+        </ul>
+    </div>
+
+
+
+</div>
+
+<script>
+    function GetPath() {
+        var formData = new FormData();
+        formData.append('file', $('#path').prop('files')[0]);
+
+
+        $.ajax({
+            cache: false,
+            type: "POST",
+            url: "/Home/GetPath",
+            processData: false,
+            contentType: false,
+            data: formData,
+            success: function (data) {
+                var turtle = data.turtle;
+                $("#finalLocation").html("(" + turtle.location.x + ", " + turtle.location.y + ")");
+                $("#turtlePath").html(CreateList(turtle.path));
+                $("#info").show();
+            },
+            error: function (xhr, ajaxOptions, thrownError) {
+                console.log(xhr);
+            }
+        });
+    }
+
+    function CreateList(path) {
+        var html = "";
+        for (var i = 0; i < path.length; i++) {
+            var position = path[i];
+            html += "<li";
+            if (position.isDuplicate) {
+                html += " class=highlight ";
+            }
+            html += ">(" + position.cords.x + ", " + position.cords.y + ")</li>";
+        }
+        return html;
+    }
+</script>
+
+<style>
+    #info {
+        display: none;
+    }
+
+    label {
+        font-weight: bold;
+    }
+
+    .highlight {
+        background-color: yellow;
+    }
+</style>
